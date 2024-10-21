@@ -1,0 +1,40 @@
+name: Switch Between True and False Pages
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  switch-pages:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Get the current hour
+      id: time
+      run: echo "::set-output name=hour::$(date +%H)"
+
+    - name: Determine if it's true or false
+      id: switch
+      run: |
+        hour=$(( $(date +%H) % 2 )) # Alternate every hour
+        if [ "$hour" -eq 0 ]; then
+          echo "::set-output name=page::true.html"
+        else
+          echo "::set-output name=page::false.html"
+        fi
+
+    - name: Update index.html with the selected page
+      run: |
+        if [[ "$(cat index.html)" != *"${{ steps.switch.outputs.page }}"* ]]; then
+          cp ${{ steps.switch.outputs.page }} index.html
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Switched to ${{ steps.switch.outputs.page }}"
+          git push
+        else
+          echo "No change needed."
+        fi
