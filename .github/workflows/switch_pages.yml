@@ -2,7 +2,7 @@ name: Randomly Select True or False Pages
 
 on:
   schedule:
-    - cron: "*/5 * * * *" 
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -19,26 +19,26 @@ jobs:
         # Generate a random number (0 or 1)
         RANDOM_NUMBER=$(( RANDOM % 2 ))
         if [ "$RANDOM_NUMBER" -eq 0 ]; then
-          echo "::set-output name=page::true.html"
+          echo "page=true.html" >> $GITHUB_ENV
         else
-          echo "::set-output name=page::false.html"
+          echo "page=false.html" >> $GITHUB_ENV
         fi
 
     - name: Update index.html with the selected page
       run: |
-        echo "Selected page: ${{ steps.select.outputs.page }}"
+        SELECTED_PAGE=${page}
+        echo "Selected page: $SELECTED_PAGE"
         current_page=$(cat index.html)
 
         echo "Current page: $current_page"
 
-        # Check if the current page is different from the selected page
-        if [[ "$current_page" != *"${{ steps.select.outputs.page }}"* ]]; then
-          echo "Updating index.html to ${ steps.select.outputs.page }"
-          cp ${{ steps.select.outputs.page }} index.html
+        if [[ "$current_page" != *"$SELECTED_PAGE"* ]]; then
+          echo "Updating index.html to $SELECTED_PAGE"
+          cp $SELECTED_PAGE index.html
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Switched to ${{ steps.select.outputs.page }}"
+          git commit -m "Switched to $SELECTED_PAGE"
           git push
         else
           echo "No change needed."
