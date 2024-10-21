@@ -29,6 +29,7 @@ jobs:
 
     - name: Update index.html with the selected page
       run: |
+        # Check if index.html already contains the page to avoid unnecessary commits
         if [[ "$(cat index.html)" != *"${{ steps.switch.outputs.page }}"* ]]; then
           cp ${{ steps.switch.outputs.page }} index.html
           git config --global user.name "github-actions[bot]"
@@ -38,3 +39,4 @@ jobs:
           git push
         else
           echo "No change needed."
+        fi
