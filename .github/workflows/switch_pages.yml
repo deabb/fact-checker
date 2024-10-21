@@ -2,7 +2,7 @@ name: Switch Between True and False Pages
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "*/5 * * * *"  # Run every 5 minutes
 
 jobs:
   switch-pages:
@@ -12,15 +12,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Get the current hour
+    - name: Get the current time
       id: time
-      run: echo "::set-output name=hour::$(date +%H)"
+      run: echo "::set-output name=minute::$(date +%M)"
 
     - name: Determine if it's true or false
       id: switch
       run: |
-        hour=$(( $(date +%H) % 2 )) # Alternate every hour
-        if [ "$hour" -eq 0 ]; then
+        minute=$(( $(date +%M) % 2 )) # Alternate every 5 minutes
+        if [ "$minute" -eq 0 ]; then
           echo "::set-output name=page::true.html"
         else
           echo "::set-output name=page::false.html"
@@ -37,4 +37,3 @@ jobs:
           git push
         else
           echo "No change needed."
-        fi
