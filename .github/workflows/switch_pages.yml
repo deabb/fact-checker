@@ -1,9 +1,9 @@
-name: Switch Between True and False Pages
+name: Randomly Select True or False Pages
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"  # Run every 5 minutes
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 jobs:
   switch-pages:
@@ -13,15 +13,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Get the current time
-      id: time
-      run: echo "::set-output name=minute::$(date +%M)"
-
-    - name: Determine if it's true or false
-      id: switch
+    - name: Randomly Select Page
+      id: select
       run: |
-        minute=$(( $(date +%M) % 2 )) # Alternate every 5 minutes
-        if [ "$minute" -eq 0 ]; then
+        # Generate a random number (0 or 1)
+        RANDOM_NUMBER=$(( RANDOM % 2 ))
+        if [ "$RANDOM_NUMBER" -eq 0 ]; then
           echo "::set-output name=page::true.html"
         else
           echo "::set-output name=page::false.html"
@@ -29,13 +26,12 @@ jobs:
 
     - name: Update index.html with the selected page
       run: |
-        # Check if index.html already contains the page to avoid unnecessary commits
-        if [[ "$(cat index.html)" != *"${{ steps.switch.outputs.page }}"* ]]; then
-          cp ${{ steps.switch.outputs.page }} index.html
+        if [[ "$(cat index.html)" != *"${{ steps.select.outputs.page }}"* ]]; then
+          cp ${{ steps.select.outputs.page }} index.html
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Switched to ${{ steps.switch.outputs.page }}"
+          git commit -m "Switched to ${{ steps.select.outputs.page }}"
           git push
         else
           echo "No change needed."
