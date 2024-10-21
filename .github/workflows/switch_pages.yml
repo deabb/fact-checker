@@ -2,7 +2,7 @@ name: Randomly Select True or False Pages
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/5 * * * *" 
   workflow_dispatch:
 
 jobs:
@@ -26,7 +26,14 @@ jobs:
 
     - name: Update index.html with the selected page
       run: |
-        if [[ "$(cat index.html)" != *"${{ steps.select.outputs.page }}"* ]]; then
+        echo "Selected page: ${{ steps.select.outputs.page }}"
+        current_page=$(cat index.html)
+
+        echo "Current page: $current_page"
+
+        # Check if the current page is different from the selected page
+        if [[ "$current_page" != *"${{ steps.select.outputs.page }}"* ]]; then
+          echo "Updating index.html to ${ steps.select.outputs.page }"
           cp ${{ steps.select.outputs.page }} index.html
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
